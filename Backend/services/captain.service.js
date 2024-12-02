@@ -21,7 +21,7 @@ module.exports.createCaptain = async ({
     const captain = await captainModel.create({
         fullname: {
             firstname,
-            lastname,
+            lastname :lastname || '',
         },
         email,
         password: hashedPassword,
