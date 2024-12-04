@@ -1,13 +1,23 @@
-import React, { useState } from "react";
-import { Link } from "react-router-dom";
+import React, { useState, useContext } from "react";
+import { Link, useNavigate } from "react-router-dom";
+import { CaptainDataContext } from "../context/CaptainContext";
+import axios from "axios";
+
 
 const Captainsignup = () => {
+  const navigate=useNavigate();
+
   const [firstname, setFirstname] = useState("");
   const [lastname, setLastname] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [userData, setUserData] = useState({});
+  const [vehicleColor, setVehicleColor] = useState("");
+  const [vehiclePlate, setVehiclePlate] = useState("");
+  const [vehicleCapacity, setVehicleCapacity] = useState("");
+  const [vehicleType, setVehicleType] = useState("");
   const [errors, setErrors] = useState({});
+
+  const { setCaptain } = useContext(CaptainDataContext);
 
   const validateForm = () => {
     const newErrors = {};
@@ -15,9 +25,7 @@ const Captainsignup = () => {
     if (!lastname.trim()) newErrors.lastname = "Last name is required";
     if (!email.trim()) {
       newErrors.email = "Email is required";
-    } else if (
-      !/^[\w-.]+@([\w-]+\.)+[\w-]{2,4}$/.test(email)
-    ) {
+    } else if (!/^[\w-.]+@([\w-]+\.)+[\w-]{2,4}$/.test(email)) {
       newErrors.email = "Invalid email format";
     }
     if (!password.trim()) {
@@ -25,33 +33,56 @@ const Captainsignup = () => {
     } else if (password.length < 6) {
       newErrors.password = "Password must be at least 6 characters";
     }
+    if (!vehicleColor.trim()) newErrors.vehicleColor = "Vehicle color is required";
+    if (!vehiclePlate.trim()) newErrors.vehiclePlate = "Vehicle plate is required";
+    if (!vehicleCapacity.trim()) {
+      newErrors.vehicleCapacity = "Vehicle capacity is required";
+    } else if (isNaN(vehicleCapacity) || Number(vehicleCapacity) <= 0) {
+      newErrors.vehicleCapacity = "Vehicle capacity must be a positive number";
+    }
+    if (!vehicleType.trim()) newErrors.vehicleType = "Vehicle type is required";
+
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0; // No errors
   };
 
-  const submitHandler = (e) => {
+  const submitHandler = async (e) => {
     e.preventDefault();
     if (validateForm()) {
-      setUserData({
+      const newCaptain = {
         fullname: {
-          firstname,
-          lastname,
+          firstname:firstname,
+          lastname:lastname,
         },
         email,
         password,
-      });
+        vehicle: {
+          color:vehicleColor,
+          plate:vehiclePlate,
+          capacity:vehicleCapacity,
+          vehicleType:vehicleType,
+        },
+      };
+      const response=await axios.post(`${import.meta.env.VITE_BASE_URL}/captains/register`,newCaptain)
 
-      console.log("User Data:", {
-        username: { firstname, lastname },
-        email,
-        password,
-      });
+      if(response.status===201){
+        const data=response.data;
+        setCaptain(data.captain)
+        localStorage.setItem('token',data.token)
+        navigate('/captain-home')
+      }
+
+      setCaptain(newCaptain); // Update the context state
 
       // Reset fields
       setFirstname("");
       setLastname("");
       setEmail("");
       setPassword("");
+      setVehicleColor("");
+      setVehiclePlate("");
+      setVehicleCapacity("");
+      setVehicleType("");
       setErrors({});
     }
   };
@@ -114,6 +145,61 @@ const Captainsignup = () => {
           {errors.password && (
             <p className="text-red-600 text-sm mb-2">{errors.password}</p>
           )}
+
+          <h3 className="text-lg mb-2 font-medium">Vehicle Details</h3>
+          <div className="flex gap-4 mb-3">
+          <input
+            className="bg-[#eeeeee] mb-2 rounded px-4 w-1/2 text-lg placeholder:text-base py-2"
+            type="text"
+            placeholder="Vehicle color"
+            value={vehicleColor}
+            onChange={(e) => setVehicleColor(e.target.value)}
+          />
+          {errors.vehicleColor && (
+            <p className="text-red-600 mb-2 text-sm">{errors.vehicleColor}</p>
+          )}
+
+          <input
+            className="bg-[#eeeeee] mb-2 rounded px-4 w-1/2 text-lg placeholder:text-base py-2"
+            type="text"
+            placeholder="Vehicle plate"
+            value={vehiclePlate}
+            onChange={(e) => setVehiclePlate(e.target.value)}
+          />
+          {errors.vehiclePlate && (
+            <p className="text-red-600 mb-2 text-sm">{errors.vehiclePlate}</p>
+          )}
+          </div>
+          <div className="flex gap-4 mb-5">
+          <input
+            className="bg-[#eeeeee] mb-2 rounded px-4 w-1/2 text-lg placeholder:text-base py-2"
+            type='number'
+            placeholder="Vehicle capacity (number of seats)"
+            value={vehicleCapacity}
+            onChange={(e) => setVehicleCapacity(e.target.value)}
+          />
+          {errors.vehicleCapacity && (
+            <p className="text-red-600 mb-2 text-sm">{errors.vehicleCapacity}</p>
+          )}
+
+<select
+  className="bg-[#eeeeee] mb-2 rounded px-4 w-1/2 text-lg py-2"
+  value={vehicleType}
+  onChange={(e) => setVehicleType(e.target.value)}
+>
+  <option value=""  disabled>
+    <p className="text-gray-400 text-sm">Select Vehicle Type</p>
+  </option>
+  <option value="car">Car</option>
+  <option value="motorcycle">Motorcycle</option>
+  <option value="auto">Auto</option>
+</select>
+{errors.vehicleType && (
+  <p className="text-red-600 mb-2 text-sm">{errors.vehicleType}</p>
+)}
+
+          </div>
+
           <button className="bg-[#111] mb-3 text-white text-lg font-semibold py-4 rounded-md px-4 w-full">
             Register as Captain
           </button>
@@ -125,12 +211,10 @@ const Captainsignup = () => {
           </Link>
         </p>
       </div>
-      <div>
-        <p className="text-[10px] leading-tight text-gray-400">
+      <p className="text-[10px] leading-tight text-gray-400">
           We value your privacy and ensure your data is securely stored, only
           used to improve your experience, and never shared without consent.
         </p>
-      </div>
     </div>
   );
 };
