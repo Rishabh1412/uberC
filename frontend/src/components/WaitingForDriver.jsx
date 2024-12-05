@@ -1,14 +1,14 @@
-import React from 'react'
+import React from "react";
 import carloading from "../assets/carloading.svg";
 
-const WaitingForDriver = () => {
+const WaitingForDriver = (props) => {
   return (
     <div className="">
       <div
         className="w-full justify-center flex"
-        // onClick={() => {
-        //   props.setVehiclePanel(false);
-        // }}
+        onClick={() => {
+          props.setwaitignForDriver(false);
+        }}
       >
         <h5 className="flex gap-2 py-2 px-3 rounded-3xl font-medium w-fit text-center bg-gray-200 text-gray-900 items-center">
           <svg
@@ -26,8 +26,16 @@ const WaitingForDriver = () => {
         </h5>
       </div>
       {/* <h3 className="font-semibold text-2xl">Waiting for a driver</h3> */}
-      <div className="flex flex-col justify-between items-center">
-        <img className="w-56" src={carloading} alt="" />
+      <div className="flex flex-col  justify-between items-center">
+        <div className="flex py-3 px-5 rounded-md w-full justify-between items-center">
+          <img className="w-24" src={carloading} alt="" />
+          <div className="text-right">
+            <h2 className="font-semibold text-gray-900 text-lg">Driver</h2>
+            <h1 className="font-semibold text-black text-2xl">JH09 U 1408</h1>
+            <p className="text-gray-600">Maruti Suzuki Swift</p>
+          </div>
+        </div>
+
         <div className="w-full gap-4 mb-7 pb-4 flex flex-col">
           <div className="flex gap-3 border-t-2 pt-4 items-center">
             <svg
@@ -95,10 +103,9 @@ const WaitingForDriver = () => {
             </div>
           </div>
         </div>
-        
       </div>
     </div>
-  )
-}
+  );
+};
 
-export default WaitingForDriver
+export default WaitingForDriver;

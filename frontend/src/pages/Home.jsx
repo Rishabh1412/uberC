@@ -17,9 +17,12 @@ const Home = () => {
   const vehicleFoundRef = useRef(null);
   const panelRef = useRef(null);
   const panelCloseRef = useRef(null);
+  const waitingForDriverRef=useRef(null);
+
   const [vehiclePanel, setVehiclePanel] = useState(false);
   const [confirmRidePanel, setConfirmRidePanel] = useState(false);
   const [vehicleFound,setVehicleFound] = useState(false);
+  const [waitingForDriver,setwaitignForDriver] = useState(false);
 
   const submithandler = (e) => {
     e.preventdefault();
@@ -92,6 +95,21 @@ const Home = () => {
       }
     },
     [confirmRidePanel]
+  );
+
+  useGSAP(
+    function () {
+      if (waitingForDriver) {
+        gsap.to(waitingForDriverRef.current, {
+          transform: "translateY(0)",
+        });
+      } else {
+        gsap.to(waitingForDriverRef.current, {
+          transform: "translateY(100%)",
+        });
+      }
+    },
+    [waitingForDriver]
   );
 
   return (
@@ -186,8 +204,8 @@ const Home = () => {
       <div ref={vehicleFoundRef} className="w-full fixed rounded-t-2xl z-10 bottom-0 translate-y-full bg-white px-3 py-6 pt-12">
         <LookingForDriver setVehicleFound={setVehicleFound}/>
       </div>
-      <div  className="w-full fixed rounded-t-2xl z-10 bottom-0 bg-white px-3 py-6 pt-12">
-        <WaitingForDriver/>
+      <div ref={waitingForDriverRef} className="w-full fixed rounded-t-2xl z-10 bottom-0 translate-y-full bg-white px-3 py-6 pt-12">
+        <WaitingForDriver waitingForDriver={waitingForDriver}/>
       </div>
     </div>
   );
