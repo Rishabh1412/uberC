@@ -1,5 +1,6 @@
 import React from "react";
 import carloading from "../assets/carloading.svg";
+
 const ConfirmedRide = (props) => {
   return (
     <div className="">

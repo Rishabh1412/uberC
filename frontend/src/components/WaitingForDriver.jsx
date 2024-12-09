@@ -3,7 +3,7 @@ import carloading from "../assets/carloading.svg";
 
 const WaitingForDriver = (props) => {
   return (
-    <div className="">
+    <div className=""> 
       <div
         className="w-full justify-center flex"
         onClick={() => {

@@ -11,11 +11,13 @@ import UserLogout from './pages/UserLogout';
 import CaptainHome from "./pages/CaptainHome";
 import CaptainProtectedWrapper from "./pages/CaptainProtectedWrapper";
 import CaptainLogout from "./pages/CaptainLogout";
+import Riding from "./pages/Riding";
+import CaptainRiding from "./pages/CaptainRiding";
 
 
 const App = () => {
   return (
-    <div>
+    <div className="font-poppins">
       <Routes>
         <Route path="/" element={<Start />} />
         <Route path="/login" element={<Userlogin />} />
@@ -52,6 +54,22 @@ const App = () => {
             <CaptainProtectedWrapper>
               <CaptainLogout/>
             </CaptainProtectedWrapper>
+          }
+        />
+        <Route
+          path="/captain-riding"
+          element={
+            <CaptainProtectedWrapper>
+              <CaptainRiding/>
+            </CaptainProtectedWrapper>
+          }
+        />
+        <Route
+          path="/riding"
+          element={
+            <UserProtectedWrapper>
+              <Riding/>
+            </UserProtectedWrapper>
           }
         />
       </Routes>
