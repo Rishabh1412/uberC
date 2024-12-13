@@ -6,15 +6,32 @@ const authMiddleware=require('../middlewares/auth.middleware');
 
 // Registration route
 router.post('/register', [
-    body('email').isEmail().withMessage('Invalid Email'),
-    body('fullname.firstname').isLength({ min: 3 }).withMessage('Firstname should be at least 3 characters long.'),
-    body('password').isLength({ min: 6 }).withMessage('Password should be at least 6 characters long.')
+    body('email')
+        .isEmail()
+        .withMessage('Invalid email format')
+        .normalizeEmail(),
+    body('fullname.firstname')
+        .isLength({ min: 3 })
+        .withMessage('Firstname should be at least 3 characters long.')
+        .trim(),
+    body('password')
+        .isLength({ min: 6 })
+        .withMessage('Password should be at least 6 characters long.')
+        .matches(/\d/)
+        .withMessage('Password must contain at least one number.')
 ], userController.registerUser);
 
-router.post('/login',[
-    body('email').isEmail().withMessage('Invalid Email'),
-    body('password').isLength({ min: 6 }).withMessage('Password should be at least 6 characters long.')
-],userController.loginUser);
+// Login Route
+router.post('/login', [
+    body('email')
+        .isEmail()
+        .withMessage('Invalid email format')
+        .normalizeEmail(),
+    body('password')
+        .isLength({ min: 6 })
+        .withMessage('Password should be at least 6 characters long.')
+], userController.loginUser);
+
 
 router.get('/profile',authMiddleware.authUser,userController.getUserProfile);
 

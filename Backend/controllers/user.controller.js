@@ -1,7 +1,7 @@
 const userModel = require('../models/user.model');
 const userService = require('../services/user.service');
 const { validationResult } = require('express-validator');
-const blackListModel=require('../models/blacklistToken.model');
+const blacklistModel =require('../models/blacklistToken.model');
 
 module.exports.registerUser = async (req, res, next) => {
     try {
@@ -10,34 +10,41 @@ module.exports.registerUser = async (req, res, next) => {
             return res.status(400).json({ errors: errors.array() });
         }
 
-        console.log(req.body);
-
         const { fullname, email, password } = req.body;
-        
-        const isUserExist=await userModel.findOne({email});
 
-        if(isUserExist){
-            return res.status(400).json({message:'Captain already exists'})
+        // Check if the user already exists
+        const isUserExist = await userModel.findOne({ email });
+        if (isUserExist) {
+            return res.status(400).json({ message: 'User already exists.' });
         }
+
         // Hash the password
-        const hashPassword = await userModel.hashPassword(password);
+        const hashedPassword = await userModel.hashPassword(password);
 
         // Create the user
         const user = await userService.createUser({
             firstname: fullname.firstname,
-            lastname: fullname.lastname,
+            lastname: fullname.lastname || '',
             email,
-            password: hashPassword,
+            password: hashedPassword,
         });
 
         // Generate JWT token
         const token = user.generateAuthToken();
+        res.cookie('token', token, { httpOnly: true});
 
-        // Respond with token and user (hide sensitive info)
-        res.status(201).json({ token, user: { email: user.email, fullname: user.fullname } });
+
+        // Respond with token and user (hiding sensitive data)
+        res.status(201).json({ 
+            token, 
+            user: { 
+                email: user.email, 
+                fullname: user.fullname 
+            } 
+        });
     } catch (error) {
         console.error(error);
-        res.status(500).json({ error: error.message });
+        next(error); // Pass errors to error-handling middleware
     }
 };
 
@@ -61,14 +68,21 @@ module.exports.loginUser = async (req, res, next) => {
         }
 
         const token = user.generateAuthToken();
+        res.cookie('token', token, { httpOnly: true});
 
-        res.cookie('token',token);
-
-        res.status(200).json({ token, user });
+        // Respond with the token and user details
+        res.status(200).json({ 
+            token, 
+            user: { 
+                email: user.email, 
+                fullname: user.fullname 
+            } 
+        });
     } catch (error) {
-        next(error);
+        next(error); // Pass errors to error-handling middleware
     }
 };
+
 
 module.exports.getUserProfile=async(req,res,next) => {
     res.status(200).json(req.user);
@@ -78,6 +92,6 @@ module.exports.logoutUser=async(req,res,next)=>{
     res.clearCookie('token');
     const token=req.cookies.token || req.headers.authorization.split(' ')[1];
 
-    await blackListModel.create({ token });
+    await blacklistModel.create({ token });
     res.status(200).json({message:'Logged out'});
 }
