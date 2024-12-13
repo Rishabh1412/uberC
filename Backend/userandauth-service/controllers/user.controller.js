@@ -1,7 +1,8 @@
-const userModel = require('../models/user.model');
 const userService = require('../services/user.service');
 const { validationResult } = require('express-validator');
 const blacklistModel =require('../models/blacklistToken.model');
+const userModel = require('../models/user.model');
+
 
 module.exports.registerUser = async (req, res, next) => {
     try {
@@ -19,7 +20,7 @@ module.exports.registerUser = async (req, res, next) => {
         }
 
         // Hash the password
-        const hashedPassword = await userModel.hashPassword(password);
+        const hashedPassword = await userModel.hashPassword(password)
 
         // Create the user
         const user = await userService.createUser({

@@ -5,7 +5,7 @@ const cors=require('cors');
 const app=express();
 const cookieParser=require('cookie-parser');
 const connectToDb=require('./db/db');
-const userRoutes=require('./routes/user.routes');
+const authRoutes=require('./routes/auth.routes');
 
 connectToDb();
 
@@ -18,6 +18,6 @@ app.get('/',(req,res)=>{
     res.send('Hello world');
 });
 
-app.use('/users',userRoutes);
+app.use('/auth',authRoutes);
 
 module.exports=app;
