@@ -1,8 +1,8 @@
 const userService = require('../services/user.service');
 const { validationResult } = require('express-validator');
 const blacklistModel =require('../models/blacklistToken.model');
-const userModel = require('../models/user.model');
-
+const userModel = require('../models/user.model')
+const bcrypt=require('bcrypt');
 
 module.exports.registerUser = async (req, res, next) => {
     try {
@@ -20,7 +20,8 @@ module.exports.registerUser = async (req, res, next) => {
         }
 
         // Hash the password
-        const hashedPassword = await userModel.hashPassword(password)
+        const salt = await bcrypt.genSalt(10);
+        const hashedPassword = await bcrypt.hash(password, salt);
 
         // Create the user
         const user = await userService.createUser({
@@ -90,9 +91,9 @@ module.exports.getUserProfile=async(req,res,next) => {
 };
 
 module.exports.logoutUser=async(req,res,next)=>{
+    
+    const token=req.cookies?.token || req.headers.authorization?.split(' ')[1];
     res.clearCookie('token');
-    const token=req.cookies.token || req.headers.authorization.split(' ')[1];
-
     await blacklistModel.create({ token });
     res.status(200).json({message:'Logged out'});
 }

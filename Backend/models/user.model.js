@@ -1,5 +1,5 @@
 const mongoose = require('mongoose');
-const bcrypt = require('bcryptjs');  // For hashing passwords
+const bcrypt = require('bcrypt');  // For hashing passwords
 const jwt = require('jsonwebtoken'); // For generating JWT tokens
 
 // Define the user schema
@@ -31,6 +31,16 @@ const userSchema = new mongoose.Schema({
     },
 });
 
+userSchema.methods.hashPassword = async function() {
+    try {
+        const salt = await bcrypt.genSalt(10);
+        this.password = await bcrypt.hash(this.password, salt);
+    } catch (error) {
+        console.error('Error hashing password:', error);
+        throw new Error('Password hashing failed');
+    }
+};
+
 // Method to compare the entered password with the stored hashed password
 userSchema.methods.comparePassword = async function(password) {
     return await bcrypt.compare(password, this.password);
@@ -38,14 +48,11 @@ userSchema.methods.comparePassword = async function(password) {
 
 // Method to generate a JWT token after login
 userSchema.methods.generateAuthToken = function() {
-    const token = jwt.sign({ userId: this._id }, 'your_jwt_secret', { expiresIn: '24h' });
+    const token = jwt.sign({ userId: this._id }, process.env.JWT_SECRET, { expiresIn: '24h' });
     return token;
 };
 
 
-userSchema.methods.hashPassword =async (password) => {
-    return await bcrypt.hash(password, 10);
-};
 
 // Create a user model from the schema
 module.exports = mongoose.model('User', userSchema);
