@@ -3,6 +3,8 @@ const express = require('express');
 const router = express.Router();
 const { body } = require('express-validator');
 const eventController = require('../controllers/eventController');
+const checkEventPermissions =require('../middlewares/checkPermission');
+const authenticUser =require('../middlewares/auth.middleware');
 
 // Routes for events
 router.post('/create',
@@ -13,12 +15,12 @@ router.post('/create',
         body('location').isString().withMessage('Location should be at least 5 letters'),
         body('organizer').isMongoId().withMessage('Organizer must be a valid ID'),
         body('members').isArray().withMessage('Members must be an array').optional(),
-    ],
+    ],authenticUser,
     eventController.createEvent
 ); // Create an event
 
-router.get('/:id', eventController.getEvent); // Get a specific event by ID
-router.get('/', eventController.getAllEvents); // Get all events
+router.get('/:id', authenticUser ,checkEventPermissions ,eventController.getEvent); // Get a specific event by ID
+router.get('/',authenticUser, eventController.getAllEvents); // Get all events
 
 router.put('/edit/:id',
     [
@@ -28,10 +30,11 @@ router.put('/edit/:id',
         body('location').optional().isString().withMessage('Location must be a string'),
         body('organizer').optional().isMongoId().withMessage('Organizer must be a valid ID'),
         body('members').optional().isArray().withMessage('Members must be an array'),
-    ],
+    ],authenticUser ,
+    checkEventPermissions,
     eventController.updateEvent
 ); // Update an event by ID
 
-router.delete('/delete/:id', eventController.deleteEvent); // Delete an event by ID
+router.delete('/delete/:id',authenticUser, checkEventPermissions, eventController.deleteEvent); // Delete an event by ID
 
 module.exports = router;
